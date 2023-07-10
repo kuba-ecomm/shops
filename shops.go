@@ -1,4 +1,4 @@
-package battles
+package shops
 
 import (
 	"context"
@@ -73,7 +73,7 @@ func (api *Api) ShopByUUID(battleUUID uuid.UUID) (*models.Shop, error) {
 			Uuid: battleUUID.Bytes(),
 		},
 	}
-	return api.getBattle(getter)
+	return api.getShop(getter)
 }
 
 // ShopByName is
@@ -83,7 +83,7 @@ func (api *Api) ShopByName(name string) (*models.Shop, error) {
 			Name: name,
 		},
 	}
-	return api.getBattle(getter)
+	return api.getShop(getter)
 }
 
 // ShopByCode is
@@ -93,11 +93,11 @@ func (api *Api) ShopByCode(code string) (*models.Shop, error) {
 			Code: code,
 		},
 	}
-	return api.getBattle(getter)
+	return api.getShop(getter)
 }
 
-// getBattle is
-func (api *Api) getBattle(getter *proto.ShopGetter) (*models.Shop, error) {
+// getShop is
+func (api *Api) getShop(getter *proto.ShopGetter) (*models.Shop, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), api.timeout)
 	defer cancel()
 
