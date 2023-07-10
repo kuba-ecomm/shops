@@ -26,8 +26,8 @@ func (b Shop) Proto() *proto.Shop {
 	return shop
 }
 
-// BattleFromProto is
-func BattleFromProto(pb *proto.Shop) *Shop {
+// ShopFromProto is
+func ShopFromProto(pb *proto.Shop) *Shop {
 	shop := &Shop{
 		UUID:        uuid.FromBytesOrNil(pb.Uuid),
 		Name:        pb.Name,
@@ -38,16 +38,16 @@ func BattleFromProto(pb *proto.Shop) *Shop {
 	return shop
 }
 
-// BattlesToProto is
-func BattlesToProto(battles []*Shop) (pb []*proto.Shop) {
+// ShopsToProto is
+func ShopsToProto(battles []*Shop) (pb []*proto.Shop) {
 	for _, b := range battles {
 		pb = append(pb, b.Proto())
 	}
 	return
 }
 
-// BattlesFromProto is
-func BattlesFromProto(pb []*proto.Shop) (battles []*Shop) {
+// ShopsFromProto is
+func ShopsFromProto(pb []*proto.Shop) (battles []*Shop) {
 	for _, b := range pb {
 		battles = append(battles, BattleFromProto(b))
 	}
