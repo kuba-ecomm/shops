@@ -49,7 +49,7 @@ func ShopsToProto(battles []*Shop) (pb []*proto.Shop) {
 // ShopsFromProto is
 func ShopsFromProto(pb []*proto.Shop) (battles []*Shop) {
 	for _, b := range pb {
-		battles = append(battles, BattleFromProto(b))
+		battles = append(battles, ShopFromProto(b))
 	}
 	return
 }
