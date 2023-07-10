@@ -106,5 +106,5 @@ func (api *Api) getShop(getter *proto.ShopGetter) (*models.Shop, error) {
 		return nil, fmt.Errorf("get battle api request: %w", err)
 	}
 
-	return models.BattleFromProto(resp), nil
+	return models.ShopFromProto(resp), nil
 }
