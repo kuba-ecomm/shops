@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gofrs/uuid"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 
@@ -20,15 +19,10 @@ const timeOut = 60
 // IShopsAPI is
 type IShopsAPI interface {
 
-	// ShopByUUID is
-	ShopByUUID(battleUUID uuid.UUID) (*models.Shop, error)
-
 	// ShopByName is
 	ShopByName(name string) (*models.Shop, error)
 
-	// ShopByCode is
-	ShopByCode(code string) (*models.Shop, error)
-
+	CreateStock(s *models.Stock)  error
 	// Close GRPC Api connection
 	Close() error
 }
@@ -42,6 +36,8 @@ type Api struct {
 	proto.ShopsServiceClient
 }
 
+
+
 // New create new Battles Api instance
 func New(addr string) (IShopsAPI, error) {
 	api := &Api{timeout: timeOut * time.Second}
@@ -52,6 +48,26 @@ func New(addr string) (IShopsAPI, error) {
 
 	api.ShopsServiceClient = proto.NewShopsServiceClient(api.ClientConn)
 	return api, nil
+}
+func (api *Api) CreateStock(s *models.Stock) (err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), api.timeout)
+	defer cancel()
+
+	stock := &proto.Stock{
+		Title:       s.Title,
+		Description: s.Description,
+		Source:      s.Source,
+		StockType:   s.StockType,
+		Brand:       s.Brand,
+		Price:       float32(s.Price),
+		Uuid:        s.UUID.Bytes(),
+	}
+
+	_, err = api.ShopsServiceClient.CreateStock(ctx, stock)
+	if err != nil {
+		return fmt.Errorf("create stock api request: %w", err)
+	}
+	return
 }
 
 // initConn initialize connection to Grpc servers
@@ -66,31 +82,11 @@ func (api *Api) initConn(addr string) (err error) {
 	return
 }
 
-// ShopByUUID is
-func (api *Api) ShopByUUID(battleUUID uuid.UUID) (*models.Shop, error) {
-	getter := &proto.ShopGetter{
-		Getter: &proto.ShopGetter_Uuid{
-			Uuid: battleUUID.Bytes(),
-		},
-	}
-	return api.getShop(getter)
-}
-
 // ShopByName is
 func (api *Api) ShopByName(name string) (*models.Shop, error) {
 	getter := &proto.ShopGetter{
 		Getter: &proto.ShopGetter_Name{
 			Name: name,
-		},
-	}
-	return api.getShop(getter)
-}
-
-// ShopByCode is
-func (api *Api) ShopByCode(code string) (*models.Shop, error) {
-	getter := &proto.ShopGetter{
-		Getter: &proto.ShopGetter_Code{
-			Code: code,
 		},
 	}
 	return api.getShop(getter)
