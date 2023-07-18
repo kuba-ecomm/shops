@@ -62,6 +62,8 @@ func (api *Api) CreateStock(s *models.Stock) (err error) {
 		Price:       float32(s.Price),
 		Uuid:        s.UUID.Bytes(),
 	}
+	fmt.Println("stock is")
+		fmt.Println(stock)
 
 	_, err = api.ShopsServiceClient.CreateStock(ctx, stock)
 	if err != nil {
