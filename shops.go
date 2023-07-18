@@ -82,7 +82,7 @@ func (api *Api) CreateStock(s *models.Stock) (err error) {
 	if err != nil {
 		return fmt.Errorf("create stock api request: %w", err)
 	}
-	return
+	return nil
 }
 
 // initConn initialize connection to Grpc servers
