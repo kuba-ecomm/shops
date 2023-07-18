@@ -80,6 +80,7 @@ func (api *Api) CreateStock(s *models.Stock) (err error) {
 	}
 	_, err = api.ShopsServiceClient.CreateStock(ctx, stock)
 	if err != nil {
+		fmt.Println("ERROR!!!")
 		return fmt.Errorf("create stock api request: %w", err)
 	}
 	return nil
