@@ -64,7 +64,20 @@ func (api *Api) CreateStock(s *models.Stock) (err error) {
 	}
 	fmt.Println("stock is")
 		fmt.Println(stock)
-
+	if stock == nil {
+		fmt.Println("stock is nil")
+	} else {
+		fmt.Println("stock is not nil")
+	}
+	if api.ShopsServiceClient == nil {
+		fmt.Println("ShopsServiceClient is nil")
+	} else {
+		fmt.Println("ShopsServiceClient is not nil")
+	}
+	_, err = api.ShopsServiceClient.CreateStock(ctx, stock)
+	if err != nil {
+		return fmt.Errorf("create stock api request: %w", err)
+	}
 	_, err = api.ShopsServiceClient.CreateStock(ctx, stock)
 	if err != nil {
 		return fmt.Errorf("create stock api request: %w", err)
