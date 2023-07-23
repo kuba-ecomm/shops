@@ -13,9 +13,10 @@ type Stock struct {
 	Brand       string  `json:"brand"`
 	Price       float64 `json:"price"`
 	StockType   string  `json:"stockType"` // todo: change to StockType iota
+	Quantity    int     `json:"quantity"`
 }
 
-func NewStock(title, description, source, stockType, brand string, price float64, uuid uuid.UUID) *Stock {
+func NewStock(title, description, source, stockType, brand string, price float64, uuid uuid.UUID, quantity int) *Stock {
 	return &Stock{
 		UUID:        uuid,
 		Title:       title,
@@ -24,6 +25,7 @@ func NewStock(title, description, source, stockType, brand string, price float64
 		Price:       price,
 		StockType:   stockType,
 		Brand:       brand,
+		Quantity:    quantity,
 	}
 }
 
@@ -36,6 +38,7 @@ func (st *Stock) ToProto() *proto.Stock {
 		Price:       float32(st.Price),
 		Brand:       st.Brand,
 		Uuid:        st.UUID.Bytes(),
+		Quantity:    int64(st.Quantity),
 	}
 }
 
@@ -48,6 +51,7 @@ func StockFromProto(pb *proto.Stock) *Stock {
 		StockType:   pb.StockType,
 		Price:       float64(pb.Price),
 		Brand:       pb.Brand,
+		Quantity:    int(pb.Quantity),
 	}
 
 	return shop
