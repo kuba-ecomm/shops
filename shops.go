@@ -18,8 +18,8 @@ const timeOut = 60
 
 // IShopsAPI is
 type IShopsAPI interface {
-	 GetStocks() ([]*models.Stock, error)
-	 AllStockItems(pb *proto.StockItems) ([]*models.Stock, error)
+	GetStocks() ([]*models.Stock, error)
+	AllStockItems(pb *proto.Stocks) ([]*models.Stock, error)
 	// ShopByName is
 	ShopByName(name string) (*models.Shop, error)
 
@@ -48,22 +48,22 @@ func New(addr string) (IShopsAPI, error) {
 	api.ShopsServiceClient = proto.NewShopsServiceClient(api.ClientConn)
 	return api, nil
 }
-func (api *Api) AllStockItems(pb *proto.StockItems) ([]*models.Stock, error) {
-	ppp := models.StocksFromProto(pb.StockItems)
+func (api *Api) AllStockItems(pb *proto.Stocks) ([]*models.Stock, error) {
+	ppp := models.StocksFromProto(pb.Stocks)
 	return ppp, nil
 }
 func (api *Api) GetStocks() ([]*models.Stock, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), api.timeout)
 	defer cancel()
 
-		var resp *proto.StockItems
-		var empty proto.StockEmpty
-		resp, err := api.ShopsServiceClient.GetStocks(ctx, &empty)
-		if err != nil {
-			return nil, fmt.Errorf("GetStocks api request: %w", err)
-		}
+	var resp *proto.Stocks
+	var empty proto.StockEmpty
+	resp, err := api.ShopsServiceClient.GetStocks(ctx, &empty)
+	if err != nil {
+		return nil, fmt.Errorf("GetStocks api request: %w", err)
+	}
 
-		stock := models.StocksFromProto(resp.StockItems)
+	stock := models.StocksFromProto(resp.Stocks)
 
 	return stock, nil
 }
