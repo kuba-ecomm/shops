@@ -44,7 +44,6 @@ func (st *Stock) ToProto() *proto.Stock {
 
 func StockFromProto(pb *proto.Stock) *Stock {
 	shop := &Stock{
-		UUID:        uuid.FromBytesOrNil(pb.Uuid),
 		Title:       pb.Title,
 		Description: pb.Description,
 		Source:      pb.Source,
@@ -52,6 +51,10 @@ func StockFromProto(pb *proto.Stock) *Stock {
 		Price:       float64(pb.Price),
 		Brand:       pb.Brand,
 		Quantity:    int(pb.Quantity),
+	}
+		shop.UUID=uuid.FromBytesOrNil(pb.Uuid)
+	if shop.UUID == nil{
+		shop.UUID = uuid.NewV4()	//todo: REFACTOR!
 	}
 
 	return shop
