@@ -1,137 +1,73 @@
-package shops
+package models
 
 import (
-	"context"
-	"fmt"
-	"time"
-
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/keepalive"
-
-	"github.com/kuba-ecomm/shops/models"
+	"github.com/gofrs/uuid"
 	proto "github.com/kuba-ecomm/shops/protocols/shops"
 )
 
-// TODO need to set timeout via lib initialisation
-// timeOut is  hardcoded GRPC requests timeout value
-const timeOut = 60
-
-// IShopsAPI is
-type IShopsAPI interface {
-	GetStocks() ([]*models.Stock, error)
-	AllStockItems(pb *proto.Stocks) ([]*models.Stock, error)
-	// ShopByName is
-	ShopByName(name string) (*models.Shop, error)
-
-	CreateStock(s *models.Stock) error
-	// Close GRPC Api connection
-	Close() error
+type Stock struct {
+	UUID        uuid.UUID
+	Title       string  `json:"title"`
+	Description string  `json:"description"`
+	Source      string  `json:"source"`
+	Brand       string  `json:"brand"`
+	Price       float64 `json:"price"`
+	StockType   string  `json:"stock_type"` // todo: change to StockType iota
+	Quantity    int     `json:"quantity"`
 }
 
-// Api is profile-service GRPC Api
-// structure with client Connection
-type Api struct {
-	addr    string
-	timeout time.Duration
-	*grpc.ClientConn
-	proto.ShopsServiceClient
+func NewStock(title, description, source, stockType, brand string, price float64, uuid uuid.UUID, quantity int) *Stock {
+	return &Stock{
+		UUID:        uuid,
+		Title:       title,
+		Description: description,
+		Source:      source,
+		Price:       price,
+		StockType:   stockType,
+		Brand:       brand,
+		Quantity:    quantity,
+	}
 }
 
-// New create new Battles Api instance
-func New(addr string) (IShopsAPI, error) {
-	api := &Api{timeout: timeOut * time.Second}
-
-	if err := api.initConn(addr); err != nil {
-		return nil, fmt.Errorf("create Battles Api:  %w", err)
+func (st *Stock) ToProto() *proto.Stock {
+	return &proto.Stock{
+		Title:       st.Title,
+		Description: st.Description,
+		Source:      st.Source,
+		StockType:   st.StockType,
+		Price:       float32(st.Price),
+		Brand:       st.Brand,
+		Uuid:        st.UUID.Bytes(),
+		Quantity:    int64(st.Quantity),
 	}
-
-	api.ShopsServiceClient = proto.NewShopsServiceClient(api.ClientConn)
-	return api, nil
-}
-func (api *Api) AllStockItems(pb *proto.Stocks) ([]*models.Stock, error) {
-	ppp := models.StocksFromProto(pb.Stocks)
-	return ppp, nil
-}
-func (api *Api) GetStocks() ([]*models.Stock, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), api.timeout)
-	defer cancel()
-
-	var resp *proto.Stocks
-	empty := new(proto.StockEmpty)
-	resp, err := api.ShopsServiceClient.GetStocks(ctx, empty)
-	if err != nil {
-		return nil, fmt.Errorf("GetStocks api request: %w", err)
-	}
-
-	stock := models.StocksFromProto(resp.Stocks)
-
-	return stock, nil
-}
-func (api *Api) CreateStock(s *models.Stock) (err error) {
-	ctx, cancel := context.WithTimeout(context.Background(), api.timeout)
-	defer cancel()
-
-	stock := &proto.Stock{
-		Title:       s.Title,
-		Description: s.Description,
-		Source:      s.Source,
-		StockType:   s.StockType,
-		Brand:       s.Brand,
-		Price:       float32(s.Price),
-		Uuid:        s.UUID.Bytes(),
-	}
-	fmt.Println("stock is")
-	fmt.Println(stock)
-	if stock == nil {
-		fmt.Println("stock is nil")
-	} else {
-		fmt.Println("stock is not nil")
-	}
-	if api.ShopsServiceClient == nil {
-		fmt.Println("ShopsServiceClient is nil")
-	} else {
-		fmt.Println("ShopsServiceClient is not nil")
-	}
-
-	_, err = api.ShopsServiceClient.CreateStock(ctx, stock)
-	if err != nil {
-		fmt.Println("ERROR!!!")
-		return fmt.Errorf("create stock api request: %w", err)
-	}
-	return nil
 }
 
-// initConn initialize connection to Grpc servers
-func (api *Api) initConn(addr string) (err error) {
-	var kacp = keepalive.ClientParameters{
-		Time:                10 * time.Second, // send pings every 10 seconds if there is no activity
-		Timeout:             time.Second,      // wait 1 second for ping ack before considering the connection dead
-		PermitWithoutStream: true,             // send pings even without active streams
+func StockFromProto(pb *proto.Stock) *Stock {
+	shop := &Stock{
+		UUID:  uuid.FromBytesOrNil(pb.Uuid),
+		Title:       pb.Title,
+		Description: pb.Description,
+		Source:      pb.Source,
+		StockType:   pb.StockType,
+		Price:       float64(pb.Price),
+		Brand:       pb.Brand,
+		Quantity:    int(pb.Quantity),
 	}
 
-	api.ClientConn, err = grpc.Dial(addr, grpc.WithInsecure(), grpc.WithKeepaliveParams(kacp))
+	return shop
+}
+func StocksFromProto(pb []*proto.Stock) (stocks []*Stock) {
+	for _, p := range pb {
+		stocks = append(stocks, StockFromProto(p))
+	}
+	return
+}
+func StocksToProto(stocks []*Stock) (pb *proto.Stocks) {
+	var protoStocks []*proto.Stock
+	for i := range stocks {
+		protoStocks = append(protoStocks, stocks[i].ToProto())
+	}
+	pb = &proto.Stocks{Stocks: protoStocks}
 	return
 }
 
-// ShopByName is
-func (api *Api) ShopByName(name string) (*models.Shop, error) {
-	getter := &proto.ShopGetter{
-		Getter: &proto.ShopGetter_Name{
-			Name: name,
-		},
-	}
-	return api.getShop(getter)
-}
-
-// getShop is
-func (api *Api) getShop(getter *proto.ShopGetter) (*models.Shop, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), api.timeout)
-	defer cancel()
-
-	resp, err := api.ShopsServiceClient.ShopBy(ctx, getter)
-	if err != nil {
-		return nil, fmt.Errorf("get battle api request: %w", err)
-	}
-
-	return models.ShopFromProto(resp), nil
-}
