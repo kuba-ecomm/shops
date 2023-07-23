@@ -3,6 +3,7 @@ package models
 import (
 	"github.com/gofrs/uuid"
 	proto "github.com/kuba-ecomm/shops/protocols/shops"
+	"github.com/misnaged/annales/logger"
 )
 
 type Stock struct {
@@ -30,6 +31,10 @@ func NewStock(title, description, source, stockType, brand string, price float64
 }
 
 func (st *Stock) ToProto() *proto.Stock {
+	logger.Log().Println("ToProto!")
+	if st == nil{
+		logger.Log().Println("ST IS NIL!")
+	}
 	return &proto.Stock{
 		Title:       st.Title,
 		Description: st.Description,
@@ -52,9 +57,10 @@ func StockFromProto(pb *proto.Stock) *Stock {
 		Brand:       pb.Brand,
 		Quantity:    int(pb.Quantity),
 	}
-		shop.UUID=uuid.FromBytesOrNil(pb.Uuid)
-	if shop.UUID == nil{
-		shop.UUID = uuid.NewV4()	//todo: REFACTOR!
+	shop.UUID = uuid.FromBytesOrNil(pb.Uuid)
+	if shop.UUID == uuid.Nil {
+		logger.Log().Println("NIL!")
+			shop.UUID, _ = uuid.NewV4() //todo: REFACTOR!
 	}
 
 	return shop
@@ -66,6 +72,9 @@ func StocksFromProto(pb []*proto.Stock) (stocks []*Stock) {
 	return
 }
 func StocksToProto(stocks []*Stock) (pb *proto.Stocks) {
+	if stocks ==nil{
+		logger.Log().Println("Stocks is nil!!!")
+	}
 	for _, s := range stocks {
 		pb.Stocks = append(pb.Stocks, s.ToProto())
 	}
