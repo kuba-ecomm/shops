@@ -1,0 +1,28 @@
+syntax = "proto3";
+package models;
+
+option go_package = "protocols/shops";
+
+import "models.proto";
+
+// ShopsService is
+service ShopsService {
+    rpc GetStocks(StockEmpty) returns(models.StockItems);
+    rpc ShopBy(ShopGetter) returns(models.Shop);
+    rpc CreateStock(models.Stock) returns(StockEmpty);
+
+}
+
+message ShopEmpty {}
+
+message StockEmpty{}
+// UserGetter is
+message ShopGetter {
+    oneof getter {
+        bytes   uuid    = 1;
+        string  code    = 2;
+        string  name    = 3;
+    }
+}
+
+
