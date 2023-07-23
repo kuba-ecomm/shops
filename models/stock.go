@@ -12,7 +12,7 @@ type Stock struct {
 	Source      string  `json:"source"`
 	Brand       string  `json:"brand"`
 	Price       float64 `json:"price"`
-	StockType   string  `json:"stockType"` // todo: change to StockType iota
+	StockType   string  `json:"stock_type"` // todo: change to StockType iota
 	Quantity    int     `json:"quantity"`
 }
 
