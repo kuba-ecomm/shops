@@ -58,9 +58,9 @@ func StocksFromProto(pb []*proto.Stock) (stocks []*Stock) {
 	}
 	return
 }
-func StocksToProto(stocks []*Stock) (pb []*proto.Stock) {
+func StocksToProto(stocks []*Stock) (pb *proto.StockItems) {
 	for _, s := range stocks {
-		pb = append(pb, s.ToProto())
+		pb.StockItems = append(pb.StockItems, s.ToProto())
 	}
 	return
 }
