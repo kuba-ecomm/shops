@@ -57,8 +57,8 @@ func (api *Api) GetStocks() ([]*models.Stock, error) {
 	defer cancel()
 
 	var resp *proto.Stocks
-	var empty proto.StockEmpty
-	resp, err := api.ShopsServiceClient.GetStocks(ctx, &empty)
+	empty := new(proto.StockEmpty)
+	resp, err := api.ShopsServiceClient.GetStocks(ctx, empty)
 	if err != nil {
 		return nil, fmt.Errorf("GetStocks api request: %w", err)
 	}
