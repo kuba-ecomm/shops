@@ -18,11 +18,12 @@ const timeOut = 60
 
 // IShopsAPI is
 type IShopsAPI interface {
-
+	AllToProto(m []*models.Stock) (*proto.StockItems, error)
+	AllStockItems(pb *proto.StockItems) ([]*models.Stock, error)
 	// ShopByName is
 	ShopByName(name string) (*models.Shop, error)
 
-	CreateStock(s *models.Stock)  error
+	CreateStock(s *models.Stock) error
 	// Close GRPC Api connection
 	Close() error
 }
@@ -36,8 +37,6 @@ type Api struct {
 	proto.ShopsServiceClient
 }
 
-
-
 // New create new Battles Api instance
 func New(addr string) (IShopsAPI, error) {
 	api := &Api{timeout: timeOut * time.Second}
@@ -48,6 +47,13 @@ func New(addr string) (IShopsAPI, error) {
 
 	api.ShopsServiceClient = proto.NewShopsServiceClient(api.ClientConn)
 	return api, nil
+}
+func (api *Api) AllStockItems(pb *proto.StockItems) ([]*models.Stock, error) {
+	ppp := models.StocksFromProto(pb.StockItems)
+	return ppp, nil
+}
+func (api *Api) AllToProto(m []*models.Stock) (*proto.StockItems, error) {
+	return models.StocksToProto(m), nil
 }
 func (api *Api) CreateStock(s *models.Stock) (err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), api.timeout)
@@ -63,7 +69,7 @@ func (api *Api) CreateStock(s *models.Stock) (err error) {
 		Uuid:        s.UUID.Bytes(),
 	}
 	fmt.Println("stock is")
-		fmt.Println(stock)
+	fmt.Println(stock)
 	if stock == nil {
 		fmt.Println("stock is nil")
 	} else {
